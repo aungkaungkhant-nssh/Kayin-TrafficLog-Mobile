@@ -1,15 +1,12 @@
+import { addOffenseCase } from '@/api/offense-case';
 import { AlertModal } from '@/components/ui/AlertModal';
 import CaseRecord from '@/components/ui/CaseRecords';
 import DateFilter from '@/components/ui/DateFilter';
 import ExportButton from '@/components/ui/ExportButton';
-import ExportModal from '@/components/ui/ExportModal';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import NotFound from '@/components/ui/NotFound';
 import VehicleCategoriesFilter from '@/components/ui/VehicleCategoriesFilter';
-import vehicleCategoriesData from '@/constants/VehicleCategories';
 import { caseFilterWithDateData2 } from '@/database/offenderVehicles/offenderVehicles';
-import { exportSeizureDataToJson } from '@/helpers/exportJsonFile';
-import { saveExcelToDownloads } from '@/helpers/saveExcelToDownLoad';
 import { useCaseFilterWithDate } from '@/hooks/useCase';
 import { useVehicleCategories } from '@/hooks/useVehicleCategories';
 import { ExportTypeEnum } from '@/utils/enum/ExportType';
@@ -34,33 +31,40 @@ const Records = () => {
     }, [vehicleCategories]);
 
 
-    const { cases, loading, loadMore, hasMore } = useCaseFilterWithDate(
+    const { cases, loading, loadMore, hasMore, setLoading } = useCaseFilterWithDate(
         fromDate,
         toDate,
         vehicleCategoryId
     );
 
     const handleExport = async (isShare = false) => {
+        setLoading(true)
+       
         const data = await caseFilterWithDateData2(fromDate, toDate, vehicleCategoryId, exportType) as any;
+        console.log(data)
         if (data.length) {
             if (exportType === ExportTypeEnum.All) {
-                const fileName = `${toDate}-${data[0].officer_name}.json`
-                await exportSeizureDataToJson(data, fileName, isShare);
+                await addOffenseCase(data);
+                // const fileName = `${toDate}-${data[0].officer_name}.json`
+                // await exportSeizureDataToJson(data, fileName, isShare);
             }
             if (exportType === ExportTypeEnum.Filed) {
-                const fileName = `${toDate} ${vehicleCategoriesData[+vehicleCategoryId - 1]}ဖိုင်.xlsx`;
-                await saveExcelToDownloads(data, fileName, isShare)
+                // const fileName = `${toDate} ${vehicleCategoriesData[+vehicleCategoryId - 1]}ဖိုင်.xlsx`;
+                // await saveExcelToDownloads(data, fileName, isShare)
             }
         } else {
             setIsAlert(true)
             setVisible(false)
         }
+
+        setLoading(false)
         // if (data?.length) {
         //     const fileName = `${toDate} ${vehicleCategoriesData[+vehicleCategoryId - 1]}ဖိုင်.xlsx`;
         //     await saveExcelToDownloads(data, fileName)
         // }
 
     }
+    console.log(loading)
     return (
         <View style={styles.container}>
             <AlertModal
@@ -70,14 +74,14 @@ const Records = () => {
                 onCancel={() => setIsAlert(false)}
                 confirmText="ပိတ်မည်။"
             />
-            <ExportModal
+            {/* <ExportModal
                 exportType={exportType}
                 setExportType={setExportType}
                 visible={visible}
                 onCancel={() => setVisible(false)}
                 onConfirm={() => handleExport()}
                 onShare={() => handleExport(true)}
-            />
+            /> */}
             <DateFilter
                 fromDate={fromDate}
                 toDate={toDate}
@@ -105,7 +109,7 @@ const Records = () => {
                 )
 
             }
-            <ExportButton onPress={() => setVisible(true)} />
+            <ExportButton onPress={handleExport} />
         </View>
     )
 }

@@ -74,5 +74,5 @@ export const useCaseFilterWithDate = (
         }
     };
 
-    return { cases, loading, error, loadMore, hasMore };
+    return { cases, loading, error, loadMore, hasMore, setLoading };
 };
