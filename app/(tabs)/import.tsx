@@ -1,65 +1,45 @@
+import { getOffenseCases } from '@/api/offense-case';
 import { AlertModal } from '@/components/ui/AlertModal';
-import AppButton from '@/components/ui/AppButton';
+import DateFilter from '@/components/ui/DateFilter';
 import ErrorMessage from '@/components/ui/ErrorMessage';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { importJsonData } from '@/database/offenderVehicles/offenderVehicles';
-import { getJsonData } from '@/helpers/getJsonData';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
-import * as DocumentPicker from 'expo-document-picker';
+import { format } from 'date-fns';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
-    ScrollView,
     StyleSheet,
     Text,
     TouchableOpacity,
-    View,
+    View
 } from 'react-native';
 
 const Import = () => {
+    const today = new Date();
     const [state, setState] = useState({
         isLoading: false,
-        isSuccess: false,
-        selectedFiles: [] as any[],
+        isSuccess: false
     });
     const [error, setError] = useState<string | null>(null);
     const router = useRouter();
-
-    const handlePickFile = async () => {
-        const result = await DocumentPicker.getDocumentAsync({
-            type: 'application/json',
-            copyToCacheDirectory: true,
-            multiple: false,
-        });
-
-        if (!result.canceled && result.assets?.length) {
-            setState(prev => ({
-                ...prev,
-                selectedFiles: [...prev.selectedFiles, result.assets[0]],
-            }));
-        }
-    };
-
-    const handleRemoveFile = (uri: string) => {
-        setState(prev => ({
-            ...prev,
-            selectedFiles: prev.selectedFiles.filter(file => file.uri !== uri),
-        }));
-    };
+    const [fromDate, setFromDate] = useState(format(today, 'yyyy-MM-dd'));
+    const [toDate, setToDate] = useState(format(today, 'yyyy-MM-dd'));
 
     const handleImport = async () => {
-        if (!state.selectedFiles.length) return;
-
         setState(prev => ({ ...prev, isLoading: true }));
-        const jsonData = await getJsonData(state.selectedFiles);
-        if (!jsonData?.length) return;
-        const res = await importJsonData(jsonData);
 
-        if (res?.success) {
+        const resServer = await getOffenseCases(fromDate, toDate);
+        console.log(resServer.data.data)
+        setState(prev => ({ ...prev, isLoading: false }));
+        if (!resServer?.data?.data.length) return;
+
+        const res = await importJsonData(resServer.data.data);
+        if (res?.success && resServer.success) {
             setState(prev => ({
                 ...prev,
                 isLoading: false,
                 isSuccess: true,
-                selectedFiles: [],
             }));
         } else {
             setState(prev => ({ ...prev, isLoading: false }));
@@ -73,7 +53,7 @@ const Import = () => {
     }
 
     return (
-        <ScrollView contentContainerStyle={styles.container}>
+        <View style={{ padding: 14, flex: 1 }}>
             <AlertModal
                 visible={state.isSuccess}
                 onCancel={() => setState(prev => ({ ...prev, isSuccess: false }))}
@@ -81,40 +61,34 @@ const Import = () => {
                     router.push("/(tabs)");
                     setState(prev => ({ ...prev, isSuccess: false }));
                 }}
-                message="ဒေတာဖိုင်ထည့်ခြင်း အောင်မြင်ပါသည်။"
+                message="ဒေတာထည့်ခြင်း အောင်မြင်ပါသည်။"
                 confirmText="မူလ စာမျက်နှာ"
                 cancelText="ပိတ်မည်"
                 icon={<MaterialIcons name="check-circle" size={70} color="#4CAF50" />}
             />
+            <DateFilter
+                fromDate={fromDate}
+                toDate={toDate}
+                setFromDate={setFromDate}
+                setToDate={setToDate}
+            />
+            <View style={styles.container}>
+                {
+                    state.isLoading ? (
+                        <LoadingSpinner />
+                    ) : (
 
-            <TouchableOpacity style={styles.uploadBox} onPress={handlePickFile}>
-                <View style={styles.iconCircle}>
-                    <Ionicons name="cloud-upload-outline" size={28} color="#fff" />
-                </View>
-                <Text style={styles.uploadText}>ဖိုင်ရွေးရန်</Text>
-            </TouchableOpacity>
-
-            {state.selectedFiles.length > 0 && (
-                <>
-                    <View style={styles.fileList}>
-                        {state.selectedFiles.map(file => (
-                            <View key={file.uri} style={styles.fileItem}>
-                                <Text numberOfLines={1} style={styles.fileName}>{file.name}</Text>
-                                <TouchableOpacity onPress={() => handleRemoveFile(file.uri)}>
-                                    <Text style={styles.removeText}>ဖျက်မည်</Text>
-                                </TouchableOpacity>
+                        <TouchableOpacity style={styles.uploadBox} onPress={handleImport}>
+                            <View style={styles.iconCircle}>
+                                <Ionicons name="cloud-upload-outline" size={28} color="#fff" />
                             </View>
-                        ))}
-                    </View>
+                            <Text style={styles.uploadText}>ဒေတာထည့်ရန်</Text>
+                        </TouchableOpacity>
+                    )
+                }
+            </View>
 
-                    <AppButton
-                        label="📥 ဖိုင်ထည့်မည်"
-                        onPress={handleImport}
-                        loading={state.isLoading}
-                    />
-                </>
-            )}
-        </ScrollView>
+        </View>
     );
 };
 

@@ -1,4 +1,4 @@
-import { addOffenseCase } from '@/api/offense-case';
+import { addOffenseCases } from '@/api/offense-case';
 import { AlertModal } from '@/components/ui/AlertModal';
 import CaseRecord from '@/components/ui/CaseRecords';
 import DateFilter from '@/components/ui/DateFilter';
@@ -28,11 +28,11 @@ const Records = () => {
         toDate,
     );
 
-    const handleExport = async (isShare = false) => {
+    const handleExport = async () => {
         setLoading(true)
         const data = await caseFilterWithDateData2(fromDate, toDate, exportType) as any;
         if (data.length) {
-            const res = await addOffenseCase(data);
+            const res = await addOffenseCases(data);
             if (res?.success) {
                 setVisible(true)
             }
