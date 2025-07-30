@@ -6,7 +6,6 @@ const PAGE_SIZE = 10;
 export const useCaseFilterWithDate = (
     startDateStr: string | null,
     endDateStr: string | null,
-    vehicleCategoryIdStr: string | null
 ) => {
     const [cases, setCases] = useState<any>([]);
     const [loading, setLoading] = useState(false);
@@ -17,7 +16,7 @@ export const useCaseFilterWithDate = (
     // Function to fetch data for a page
     const fetchData = useCallback(
         async (pageToFetch: number, reset = false) => {
-            if (!startDateStr || !endDateStr || !vehicleCategoryIdStr) {
+            if (!startDateStr || !endDateStr) {
                 setCases([]);
                 setHasMore(false);
                 return;
@@ -30,7 +29,6 @@ export const useCaseFilterWithDate = (
                 const data = await caseFilterWithDatePaginateData(
                     startDateStr,
                     endDateStr,
-                    vehicleCategoryIdStr,
                     PAGE_SIZE,
                     pageToFetch * PAGE_SIZE
                 ) as any;
@@ -50,7 +48,7 @@ export const useCaseFilterWithDate = (
                 setLoading(false);
             }
         },
-        [startDateStr, endDateStr, vehicleCategoryIdStr]
+        [startDateStr, endDateStr]
     );
 
     // Reset and fetch page 0 whenever filters change

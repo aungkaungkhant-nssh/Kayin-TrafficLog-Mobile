@@ -679,14 +679,12 @@ export async function addCase(data: AddCaseSchemaType, seizure_id: number) {
 export async function caseFilterWithDatePaginateData(
     startDate: string,
     endDate: string,
-    vehicleCategoryIdStr: string,
     limit = 20,
     offset = 0
 ) {
     const db = await getDatabase();
 
     try {
-        const vehicleCategoryId = vehicleCategoryIdStr ? Number(vehicleCategoryIdStr) : '';
         const results = await db.getAllAsync(
             `
         SELECT DISTINCT vsr.id,
@@ -718,7 +716,6 @@ export async function caseFilterWithDatePaginateData(
             OR
             ((vsr.action_date IS NULL OR vsr.action_date = '') AND vsr.seized_date BETWEEN ? AND ?)
         )
-          AND (? = '' OR v.vehicle_categories_id = ?)
         ORDER BY COALESCE(vsr.action_date, vsr.seized_date) DESC
         LIMIT ? OFFSET ?
         `,
@@ -727,8 +724,6 @@ export async function caseFilterWithDatePaginateData(
                 endDate,
                 startDate,
                 endDate,
-                vehicleCategoryId,
-                vehicleCategoryId,
                 limit,
                 offset,
             ]
@@ -834,14 +829,11 @@ export async function caseFilterWithDateData(
 export async function caseFilterWithDateData2(
     startDate: string,
     endDate: string,
-    vehicleCategoryIdStr: string,
     exportType: ExportTypeEnum
 ) {
     const db = await getDatabase();
 
     try {
-        const vehicleCategoryId = vehicleCategoryIdStr ? Number(vehicleCategoryIdStr) : null;
-
         let dateFilter = '';
         const params: any[] = [];
 
@@ -878,10 +870,6 @@ export async function caseFilterWithDateData2(
         }
 
 
-        if (vehicleCategoryId !== null) {
-            dateFilter += ` AND v.vehicle_categories_id = ?`;
-            params.push(vehicleCategoryId);
-        }
 
         const results = await db.getAllAsync(
             `

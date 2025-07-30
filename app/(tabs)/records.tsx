@@ -5,66 +5,40 @@ import DateFilter from '@/components/ui/DateFilter';
 import ExportButton from '@/components/ui/ExportButton';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import NotFound from '@/components/ui/NotFound';
-import VehicleCategoriesFilter from '@/components/ui/VehicleCategoriesFilter';
 import { caseFilterWithDateData2 } from '@/database/offenderVehicles/offenderVehicles';
 import { useCaseFilterWithDate } from '@/hooks/useCase';
-import { useVehicleCategories } from '@/hooks/useVehicleCategories';
 import { ExportTypeEnum } from '@/utils/enum/ExportType';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { format } from 'date-fns';
-import React, { useEffect, useState } from 'react';
+import { useRouter } from 'expo-router';
+import React, { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 const Records = () => {
     const today = new Date();
-    const { vehicleCategories } = useVehicleCategories() as any;
     const [fromDate, setFromDate] = useState(format(today, 'yyyy-MM-dd'));
     const [toDate, setToDate] = useState(format(today, 'yyyy-MM-dd'));
-    const [vehicleCategoryId, setVehicleCategoryId] = useState("");
     const [exportType, setExportType] = useState(ExportTypeEnum.All);
     const [visible, setVisible] = useState(false);
     const [isAlert, setIsAlert] = useState(false);
-
-    useEffect(() => {
-        if (vehicleCategories.length && !vehicleCategoryId) {
-            setVehicleCategoryId(vehicleCategories[0].value);
-        }
-    }, [vehicleCategories]);
-
+    const router = useRouter();
 
     const { cases, loading, loadMore, hasMore, setLoading } = useCaseFilterWithDate(
         fromDate,
         toDate,
-        vehicleCategoryId
     );
 
     const handleExport = async (isShare = false) => {
         setLoading(true)
-       
-        const data = await caseFilterWithDateData2(fromDate, toDate, vehicleCategoryId, exportType) as any;
-        console.log(data)
+        const data = await caseFilterWithDateData2(fromDate, toDate, exportType) as any;
         if (data.length) {
-            if (exportType === ExportTypeEnum.All) {
-                await addOffenseCase(data);
-                // const fileName = `${toDate}-${data[0].officer_name}.json`
-                // await exportSeizureDataToJson(data, fileName, isShare);
+            const res = await addOffenseCase(data);
+            if (res?.success) {
+                setVisible(true)
             }
-            if (exportType === ExportTypeEnum.Filed) {
-                // const fileName = `${toDate} ${vehicleCategoriesData[+vehicleCategoryId - 1]}ဖိုင်.xlsx`;
-                // await saveExcelToDownloads(data, fileName, isShare)
-            }
-        } else {
-            setIsAlert(true)
-            setVisible(false)
         }
-
         setLoading(false)
-        // if (data?.length) {
-        //     const fileName = `${toDate} ${vehicleCategoriesData[+vehicleCategoryId - 1]}ဖိုင်.xlsx`;
-        //     await saveExcelToDownloads(data, fileName)
-        // }
-
     }
-    console.log(loading)
     return (
         <View style={styles.container}>
             <AlertModal
@@ -73,6 +47,18 @@ const Records = () => {
                 onConfirm={() => setIsAlert(false)}
                 onCancel={() => setIsAlert(false)}
                 confirmText="ပိတ်မည်။"
+            />
+            <AlertModal
+                visible={visible}
+                onCancel={() => setVisible(false)}
+                onConfirm={() => {
+                    router.push("/(tabs)");
+                    setVisible(false)
+                }}
+                message="ဒေတာထုတ်ခြင်း အောင်မြင်ပါသည်။"
+                confirmText="မူလ စာမျက်နှာ"
+                cancelText="ပိတ်မည်"
+                icon={<MaterialIcons name="check-circle" size={70} color="#4CAF50" />}
             />
             {/* <ExportModal
                 exportType={exportType}
@@ -88,7 +74,7 @@ const Records = () => {
                 setFromDate={setFromDate}
                 setToDate={setToDate}
             />
-            {
+            {/* {
                 vehicleCategoryId && (
                     <VehicleCategoriesFilter
                         vehicleCategories={vehicleCategories}
@@ -96,9 +82,9 @@ const Records = () => {
                         setVehicleCategoryId={setVehicleCategoryId}
                     />
                 )
-            }
+            } */}
             {
-                (loading && cases.length === 0) ? (
+                (loading) ? (
                     <LoadingSpinner />
                 ) : (
                     cases?.length ? (
