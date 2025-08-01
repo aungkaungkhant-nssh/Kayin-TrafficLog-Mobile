@@ -30,11 +30,9 @@ const Import = () => {
         setState(prev => ({ ...prev, isLoading: true }));
 
         const resServer = await getOffenseCases(fromDate, toDate);
-        console.log(resServer.data.data)
         setState(prev => ({ ...prev, isLoading: false }));
-        if (!resServer?.data?.data.length) return;
-
-        const res = await importJsonData(resServer.data.data);
+        if (!resServer?.data.length) return;
+        const res = await importJsonData(resServer.data);
         if (res?.success && resServer.success) {
             setState(prev => ({
                 ...prev,

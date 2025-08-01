@@ -1151,7 +1151,7 @@ export async function importJsonData(data: any[]) {
     try {
         await db.withTransactionAsync(async () => {
             await Promise.all(
-                data.map(async (data) => {
+                data.map(async (item) => {
                     const {
                         vehicle_id,
                         offender_vehicle_id,
@@ -1172,40 +1172,58 @@ export async function importJsonData(data: any[]) {
                         action_date,
                         case_number,
                         seized_item_id
-                    } = data;
+                    } = item;
 
-                    const offenderVehicle = await db.getFirstAsync(
+                    // Safely coerce IDs to numbers (or null)
+                    const toInt = (val: any) => val != null ? parseInt(val, 10) : null;
+
+                    const vehicleId = toInt(vehicle_id);
+                    const offenderVehicleId = toInt(offender_vehicle_id);
+                    const vehicleCategoriesId = toInt(vehicle_categories_id);
+                    const offenderId = toInt(offender_id);
+                    const seizureId = toInt(seizure_id);
+                    const disciplinaryCommittedId = toInt(disciplinary_committed_id);
+                    const officerId = toInt(officer_id);
+                    const seizedItemId = toInt(seized_item_id);
+                    const caseNumber = toInt(case_number);
+
+                    // Check offender_vehicles
+                    let offenderVehicle = await db.getFirstAsync(
                         `SELECT * FROM offender_vehicles WHERE id = ?`,
-                        [offender_vehicle_id]
+                        [offenderVehicleId]
                     ) as any;
-                    let offenderVehicleId = offenderVehicle?.id || null;
 
-                    if (!offenderVehicleId) {
-                        const vehicle = await db.getFirstAsync("SELECT * FROM vehicles WHERE id = ?", [vehicle_id]) as any;
-                        let vehicleId = vehicle?.id || null;
+                    if (!offenderVehicle) {
+                        // Check or insert vehicles
+                        let vehicle = await db.getFirstAsync(
+                            `SELECT * FROM vehicles WHERE id = ?`,
+                            [vehicleId]
+                        ) as any;
 
-                        if (!vehicleId) {
+                        if (!vehicle) {
                             await db.runAsync(
                                 `INSERT INTO vehicles (
                                     id, vehicle_number, vehicle_categories_id, vehicle_types,
                                     wheel_tax, vehicle_license_number, created_at, updated_at
                                 ) VALUES (?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))`,
-                                [vehicle_id, vehicle_number, vehicle_categories_id, vehicle_types, null, null]
+                                [vehicleId, vehicle_number, vehicleCategoriesId, vehicle_types, null, null]
                             );
-                            vehicleId = vehicle_id;
                         }
 
-                        const offender = await db.getFirstAsync("SELECT * FROM offenders WHERE id = ?", [offender_id]) as any;
-                        let offenderId = offender?.id || null;
+                        // Check or insert offenders
+                        let offender = await db.getFirstAsync(
+                            `SELECT * FROM offenders WHERE id = ?`,
+                            [offenderId]
+                        ) as any;
 
-                        if (!offenderId) {
+                        if (!offender) {
                             await db.runAsync(
                                 `INSERT INTO offenders (
                                     id, name, father_name, national_id_number,
                                     driver_license_number, address
                                 ) VALUES (?, ?, ?, ?, ?, ?)`,
                                 [
-                                    offender_id,
+                                    offenderId,
                                     offender_name,
                                     offender_father_name,
                                     national_id_number,
@@ -1213,29 +1231,28 @@ export async function importJsonData(data: any[]) {
                                     offender_address
                                 ]
                             );
-                            offenderId = offender_id;
                         }
 
+                        // Insert offender_vehicle
                         await db.runAsync(
                             `INSERT INTO offender_vehicles (id, offender_id, vehicle_id)
-                            VALUES (?, ?, ?)`,
-                            [offender_vehicle_id, offender_id, vehicle_id]
+                             VALUES (?, ?, ?)`,
+                            [offenderVehicleId, offenderId, vehicleId]
                         );
-
-                        offenderVehicleId = offender_vehicle_id;
                     }
 
-                    const seizureRecords = await db.getFirstAsync(
+                    // Check or insert seizure record
+                    const existingSeizure = await db.getFirstAsync(
                         `SELECT * FROM vehicle_seizure_records WHERE id = ?`,
-                        [seizure_id]
+                        [seizureId]
                     ) as any;
 
-                    if (seizureRecords) {
+                    if (existingSeizure) {
                         await db.runAsync(
                             `UPDATE vehicle_seizure_records
-                            SET case_number = ?, action_date = ?
-                            WHERE id = ?`,
-                            [case_number, action_date, seizure_id]
+                             SET case_number = ?, action_date = ?
+                             WHERE id = ?`,
+                            [caseNumber, action_date, seizureId]
                         );
                     } else {
                         await db.runAsync(
@@ -1245,15 +1262,15 @@ export async function importJsonData(data: any[]) {
                                 fine_paid, seized_item, case_number, action_date
                             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                             [
-                                seizure_id,
+                                seizureId,
                                 offenderVehicleId,
-                                disciplinary_committed_id,
-                                officer_id,
+                                disciplinaryCommittedId,
+                                officerId,
                                 seized_date,
                                 seizure_location,
                                 0,
-                                seized_item_id,
-                                case_number,
+                                seizedItemId,
+                                caseNumber,
                                 action_date
                             ]
                         );
@@ -1267,6 +1284,7 @@ export async function importJsonData(data: any[]) {
         return { success: false, error: err instanceof Error ? err.message : err };
     }
 }
+
 
 
 

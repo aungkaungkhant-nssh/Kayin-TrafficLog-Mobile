@@ -16,6 +16,7 @@ export const addOffenseCases = async (data: any) => {
 export const getOffenseCases = async (startDate: string, endDate: string) => {
     try {
         const response = await client.get(`/offense-case?startDate=${startDate}&endDate=${endDate}`);
+
         const data = response.data;
         return { success: true, data }
     } catch (error) {
