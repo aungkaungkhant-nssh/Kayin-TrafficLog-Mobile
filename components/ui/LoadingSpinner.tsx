@@ -1,7 +1,7 @@
 import React from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 
-const LoadingSpinner = ({ message = "Loading..." }: { message?: string }) => {
+const LoadingSpinner = ({ message = "လုပ်ဆောင်နေပါသည်...." }: { message?: string }) => {
     return (
         <View style={styles.container}>
             <ActivityIndicator size="large" color="#000080" />
