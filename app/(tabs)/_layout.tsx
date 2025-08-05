@@ -91,8 +91,8 @@ export default function TabLayout() {
         <Tabs.Screen
           name="records"
           options={{
-            title: 'ဖိုင်ထုတ်',
-            tabBarLabel: 'ဖိုင်ထုတ်',
+            title: 'ဒေတာထုတ်',
+            tabBarLabel: 'ဒေတာထုတ်',
             headerLeft: () => <LeftHeader />,
             tabBarIcon: ({ color }) => (
               <AntDesign name="filetext1" size={22} color={color} />
@@ -128,8 +128,8 @@ export default function TabLayout() {
         <Tabs.Screen
           name="import"
           options={{
-            title: 'ဒေတာဖိုင်ထည့်ပါ',
-            tabBarLabel: 'ဖိုင်ထည့်',
+            title: 'ဒေတာထည့်',
+            tabBarLabel: 'ဒေတာထည့်',
             headerLeft: () => <LeftHeader />,
             tabBarIcon: ({ color }) => (
               <AntDesign name="filetext1" size={22} color={color} />

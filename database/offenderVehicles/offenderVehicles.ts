@@ -200,7 +200,7 @@ export async function searchOffenderVehicles(data: SearchSchemaType) {
 export async function storePunishment(data: AddPunishmentInfoSchemaType, officerId: number) {
     const db = await getDatabase();
     try {
-        await db.withTransactionAsync(async () => {
+      
             const {
                 name,
                 father_name,
@@ -327,8 +327,6 @@ export async function storePunishment(data: AddPunishmentInfoSchemaType, officer
                     seizedItemIdInt,
                 ]
             );
-        });
-
         return { success: true };
     } catch (err) {
         console.log("Error in storePunishment:", err);
