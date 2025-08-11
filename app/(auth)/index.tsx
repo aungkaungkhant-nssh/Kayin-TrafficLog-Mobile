@@ -1,5 +1,6 @@
 import AppButton from "@/components/ui/AppButton";
 import AppTextInput from "@/components/ui/AppTextInput";
+import { useSession } from "@/context/SessionContext";
 import { loginOfficer } from "@/database/officer/auth";
 import { setUpTable } from "@/database/seed/setUpTable";
 import { loginSchema, LoginSchemaType } from "@/schema/login.schema";
@@ -8,6 +9,7 @@ import Entypo from '@expo/vector-icons/Entypo';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Image } from "expo-image";
 import { useRouter } from 'expo-router';
+import * as SecureStore from 'expo-secure-store';
 import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native";
@@ -16,6 +18,8 @@ import { Drawer } from "react-native-paper";
 const Login = () => {
     const [open, setOpen] = useState(false)
     const router = useRouter();
+    const { setOfficer } = useSession();
+
     const {
         control,
         handleSubmit,
@@ -52,6 +56,8 @@ const Login = () => {
             });
             return;
         }
+        await SecureStore.setItemAsync('officerSession', JSON.stringify(res.user));
+        setOfficer(res.user)
         clearErrors("root");
         router.replace('/(tabs)');
 
