@@ -25,13 +25,17 @@ const Import = () => {
     const router = useRouter();
     const [fromDate, setFromDate] = useState(format(today, 'yyyy-MM-dd'));
     const [toDate, setToDate] = useState(format(today, 'yyyy-MM-dd'));
+    const [isAlert, setIsAlert] = useState(false);
 
     const handleImport = async () => {
         setState(prev => ({ ...prev, isLoading: true }));
 
         const resServer = await getOffenseCases(fromDate, toDate);
         setState(prev => ({ ...prev, isLoading: false }));
-        if (!resServer?.data.length) return;
+        if (!resServer?.data.length) {
+            setIsAlert(true)
+            return
+        };
         const res = await importJsonData(resServer.data);
         if (res?.success && resServer.success) {
             setState(prev => ({
@@ -52,6 +56,13 @@ const Import = () => {
 
     return (
         <View style={{ padding: 14, flex: 1 }}>
+            <AlertModal
+                visible={isAlert}
+                message="ဒေတာမရှိပါ။"
+                onConfirm={() => setIsAlert(false)}
+                onCancel={() => setIsAlert(false)}
+                confirmText="ပိတ်မည်။"
+            />
             <AlertModal
                 visible={state.isSuccess}
                 onCancel={() => setState(prev => ({ ...prev, isSuccess: false }))}
