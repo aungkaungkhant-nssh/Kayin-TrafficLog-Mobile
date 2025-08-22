@@ -98,35 +98,63 @@ export async function loginOfficer({ user_name, password }: { user_name: string,
     }
 }
 
-export async function changePassword({ oldPassword, newPassword, officerId }: { oldPassword: string, newPassword: string, officerId: number }) {
+export async function changePassword({ oldPassword, newPassword, userName, officerId, name }: { oldPassword: string, newPassword: string, officerId: number, userName: string, name: string }) {
     try {
         const db = await getDatabase();
 
-        const existingOfficer = await db.getFirstAsync<{ password: string }>(
-            `SELECT password FROM officers WHERE id = ?`,
-            [officerId]
-        );
+        // Check if we need to verify old password
+        if (oldPassword && newPassword) {
+            const existingOfficer = await db.getFirstAsync<{ password: string }>(
+                `SELECT password FROM officers WHERE id = ?`,
+                [officerId]
+            );
 
-        if (!existingOfficer || existingOfficer.password !== oldPassword) {
-            return { success: false, error: "စကားဝှက်ဟောင်းမှားနေသည်" };
+            if (!existingOfficer) {
+                return { success: false, error: "Officer not found" };
+            }
+
+            if (existingOfficer.password !== oldPassword) {
+                return { success: false, error: "စကားဝှက်ဟောင်းမှားနေသည်" };
+            }
         }
 
-        // 2. Update password
-        await db.runAsync(
-            `
-            UPDATE officers
-            SET password = ?, updated_at = datetime('now')
-            WHERE id = ?
-            `,
-            [newPassword, officerId]
-        );
+        // Build dynamic update fields
+        const updateFields: string[] = [];
+        const params: any[] = [];
 
-        return true;
+        if (newPassword) {
+            updateFields.push("password = ?");
+            params.push(newPassword);
+        }
+
+        if (userName) {
+            updateFields.push("user_name = ?");
+            params.push(userName);
+        }
+
+        if (userName) {
+            updateFields.push("name = ?");
+            params.push(name);
+        }
+
+        updateFields.push("updated_at = datetime('now')");
+
+        // Run update if there’s something to change
+        if (updateFields.length > 1) {
+            params.push(officerId);
+            await db.runAsync(
+                `UPDATE officers SET ${updateFields.join(", ")} WHERE id = ?`,
+                params
+            );
+        }
+
+        return { success: true };
     } catch (err: any) {
         console.log(err);
         return { success: false, error: err.message };
     }
 }
+
 
 
 export async function logoutOfficer() {
