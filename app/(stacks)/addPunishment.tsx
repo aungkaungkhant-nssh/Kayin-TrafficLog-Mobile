@@ -90,16 +90,16 @@ const AddPunishment = () => {
             <AlertModal
                 visible={isSuccess}
                 onCancel={() => {
-                    router.push("/(tabs)/search");
-                    setIsSuccess(false)
-                }}
-                onConfirm={() => {
                     router.push("/(tabs)");
                     setIsSuccess(false)
                 }}
+                onConfirm={() => {
+                    router.push("/(tabs)/search");
+                    setIsSuccess(false)
+                }}
                 message="မှတ်တမ်း ထည့်ခြင်း အောင်မြင်ပါသည်။"
-                confirmText='မူလ စာမျက်နှာ'
-                cancelText='ဆက်လက် ရှာဖွေမည် '
+                confirmText='ဆက်လက် ရှာဖွေမည် '
+                cancelText='မူလ စာမျက်နှာ'
                 icon={<MaterialIcons name="check-circle" size={70} color="#4CAF50" />}
             />
 

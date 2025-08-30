@@ -65,14 +65,17 @@ const Import = () => {
             />
             <AlertModal
                 visible={state.isSuccess}
-                onCancel={() => setState(prev => ({ ...prev, isSuccess: false }))}
-                onConfirm={() => {
+                onCancel={() => {
                     router.push("/(tabs)");
+                    setState(prev => ({ ...prev, isSuccess: false }))
+                }}
+                onConfirm={() => {
+                    router.push("/(tabs)/search")
                     setState(prev => ({ ...prev, isSuccess: false }));
                 }}
                 message="ဒေတာထည့်ခြင်း အောင်မြင်ပါသည်။"
-                confirmText="မူလ စာမျက်နှာ"
-                cancelText="ပိတ်မည်"
+                confirmText='ဆက်လက် ရှာဖွေမည်'
+                cancelText='မူလ စာမျက်နှာ'
                 icon={<MaterialIcons name="check-circle" size={70} color="#4CAF50" />}
             />
             <DateFilter

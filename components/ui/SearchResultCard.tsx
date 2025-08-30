@@ -35,16 +35,15 @@ const SearchResultCard = ({
                     setSelectedData(null)
                 }}
                 onConfirm={() => {
+                    router.push("/(tabs)/search")
                     setModalState(false);
                     setSelectedData(null)
                 }}
                 message="ပြစ်မှု ထည့်ခြင်း အောင်မြင်ပါသည်။"
-                confirmText="ပိတ်မည်။"
-                cancelText="မူလ စာမျက်နှာ"
+                confirmText='ဆက်လက် ရှာဖွေမည်'
+                cancelText='မူလ စာမျက်နှာ'
                 icon={<MaterialIcons name="check-circle" size={70} color="#4CAF50" />}
             />
-
-
 
             <View style={globalStyles.card}>
                 <View style={styles.headerRow}>

@@ -50,14 +50,17 @@ const Records = () => {
             />
             <AlertModal
                 visible={visible}
-                onCancel={() => setVisible(false)}
-                onConfirm={() => {
+                onCancel={() => {
                     router.push("/(tabs)");
                     setVisible(false)
                 }}
+                onConfirm={() => {
+                    router.push("/(tabs)/search")
+                    setVisible(false)
+                }}
                 message="ဒေတာထုတ်ခြင်း အောင်မြင်ပါသည်။"
-                confirmText="မူလ စာမျက်နှာ"
-                cancelText="ပိတ်မည်"
+                confirmText='ဆက်လက် ရှာဖွေမည်'
+                cancelText='မူလ စာမျက်နှာ'
                 icon={<MaterialIcons name="check-circle" size={70} color="#4CAF50" />}
             />
             {/* <ExportModal
