@@ -6,7 +6,9 @@ export const addPunishmentInfoSchema = z.object({
     nrcState: z.string(),
     nrcTownShip: z.string(),
     nrcType: z.string(),
-    nrcNumber: z.string(),
+    nrcNumber: z.string().nonempty({ message: "မှတ်ပုံတင်အမှတ်လိုအပ်သည်" })
+        .min(6, { message: "ဂဏန်း ၆ လုံးရှိရမည်။" })
+        .max(6, { message: "ဂဏန်း ၆ လုံးရှိရမည်။" }),
     driver_license_number: z.string().nullable().optional(),
     address: z.string().nonempty({ message: "နေရပ်လိပ်စာလိုအပ်သည်" }),
 

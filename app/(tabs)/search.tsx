@@ -105,6 +105,7 @@ const Search = () => {
                 <NationalIdInput
                     control={control}
                     watch={watch}
+                    errors={errors}
                 />
 
                 <View style={globalStyles.inputWrapper}>

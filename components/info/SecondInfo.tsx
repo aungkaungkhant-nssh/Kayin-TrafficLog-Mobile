@@ -62,6 +62,7 @@ const SecondInfo = ({ control, watch, setCurrentInfo, trigger, errors }: InfoPro
                     <NationalIdInput
                         control={control}
                         watch={watch}
+                        errors={errors}
                     />
                 )
             }
@@ -114,19 +115,24 @@ const SecondInfo = ({ control, watch, setCurrentInfo, trigger, errors }: InfoPro
                 />
 
                 <AppButton
-                    label='ရှေ့သို့'
+                    label="ရှေ့သို့"
                     onPress={async () => {
-                        const valid = await trigger([
+                        const fields = [
                             "name",
                             "father_name",
                             "address",
-                        ]);
+                            checked === ExistenceStatus.Yes ? "nrcNumber" : null,
+                        ].filter(Boolean) as Array<"name" | "father_name" | "address" | "nrcNumber">; // explicitly cast to the correct type
+
+                        const valid = await trigger(fields);
+
                         if (valid) {
                             setCurrentInfo(3);
                         }
                     }}
                     loading={false}
                 />
+
             </View>
         </KeyboardAvoidingView>
     )

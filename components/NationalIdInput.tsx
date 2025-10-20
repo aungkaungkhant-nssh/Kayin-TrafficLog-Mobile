@@ -1,8 +1,9 @@
 import nrcData from '@/assets/NRC_DATA.json';
+import { AddPunishmentInfoSchemaType } from '@/schema/addPunishmentInfo.schema';
 import globalStyles from '@/styles/globalStyles';
 import React, { useMemo } from 'react';
-import { Control, Controller, UseFormWatch } from 'react-hook-form';
-import { StyleSheet, View } from 'react-native';
+import { Control, Controller, FieldErrors, UseFormWatch } from 'react-hook-form';
+import { StyleSheet, Text, View } from 'react-native';
 import AppDropdown from './ui/AppDropDown';
 import AppTextInput from './ui/AppTextInput';
 
@@ -10,9 +11,10 @@ import AppTextInput from './ui/AppTextInput';
 export type ControlProps = {
     control: Control<any>;
     watch: UseFormWatch<any>;
+    errors: FieldErrors<AddPunishmentInfoSchemaType>;
 };
 
-const NationalIdInput = ({ control, watch }: ControlProps) => {
+const NationalIdInput = ({ control, watch, errors }: ControlProps) => {
     const nrcStateValue = watch('nrcState') || '3';
     const filteredTownShips = useMemo(() => {
         if (!nrcStateValue) return [];
@@ -46,6 +48,7 @@ const NationalIdInput = ({ control, watch }: ControlProps) => {
             label: nrcType.name.mm
         }))
     }, []);
+
     return (
         <View style={globalStyles.inputWrapper}>
             {/* <Text style={{ color: "#333", }}>မှတ်ပုံတင်အမှတ်</Text> */}
@@ -109,6 +112,10 @@ const NationalIdInput = ({ control, watch }: ControlProps) => {
                             />
                         )}
                     />
+
+                    {errors.nrcNumber && (
+                        <Text style={globalStyles.errorText}>{errors.nrcNumber.message}</Text>
+                    )}
                 </View>
             </View>
         </View>
