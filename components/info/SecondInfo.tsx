@@ -33,39 +33,39 @@ const SecondInfo = ({ control, watch, setCurrentInfo, trigger, errors }: InfoPro
                     <Text style={globalStyles.errorText}>{errors.name.message}</Text>
                 )}
             </View>
-
-            <View>
-                <Text style={{ color: "#333", }}>မှတ်ပုံတင်အမှတ်</Text>
-                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', marginRight: 8 }}>
-                        <RadioButton
-                            value={checked}
-                            status={checked === ExistenceStatus.No ? 'checked' : 'unchecked'}
-                            onPress={() => setChecked(ExistenceStatus.No)}
-                        />
-                        <Text onPress={() => setChecked(ExistenceStatus.No)}>မရှိ</Text>
+            <Controller
+                control={control}
+                name="nrcExistence"
+                render={({ field: { onChange, value } }) => (
+                    <View>
+                        <Text style={{ color: "#333" }}>မှတ်ပုံတင်အမှတ်</Text>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', marginRight: 8 }}>
+                                <RadioButton
+                                    value={ExistenceStatus.No}
+                                    status={value === ExistenceStatus.No ? 'checked' : 'unchecked'}
+                                    onPress={() => onChange(ExistenceStatus.No)}
+                                />
+                                <Text onPress={() => onChange(ExistenceStatus.No)}>မရှိ</Text>
+                            </View>
+                            <Text>{" / "}</Text>
+                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                <RadioButton
+                                    value={ExistenceStatus.Yes}
+                                    status={value === ExistenceStatus.Yes ? 'checked' : 'unchecked'}
+                                    onPress={() => onChange(ExistenceStatus.Yes)}
+                                />
+                                <Text onPress={() => onChange(ExistenceStatus.Yes)}>ရှိ</Text>
+                            </View>
+                        </View>
                     </View>
-                    <Text>{" / "}</Text>
-                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                        <RadioButton
-                            value={checked}
-                            status={checked === ExistenceStatus.Yes ? 'checked' : 'unchecked'}
-                            onPress={() => setChecked(ExistenceStatus.Yes)}
-                        />
-                        <Text onPress={() => setChecked(ExistenceStatus.Yes)}>ရှိ</Text>
-                    </View>
-                </View>
-            </View>
+                )}
+            />
 
-            {
-                checked === ExistenceStatus.Yes && (
-                    <NationalIdInput
-                        control={control}
-                        watch={watch}
-                        errors={errors}
-                    />
-                )
-            }
+            {watch("nrcExistence") === ExistenceStatus.Yes && (
+                <NationalIdInput control={control} watch={watch} errors={errors} />
+            )}
+
 
 
             <View style={styles.inputWrapper}>
@@ -122,10 +122,10 @@ const SecondInfo = ({ control, watch, setCurrentInfo, trigger, errors }: InfoPro
                             "father_name",
                             "address",
                             checked === ExistenceStatus.Yes ? "nrcNumber" : null,
-                        ].filter(Boolean) as Array<"name" | "father_name" | "address" | "nrcNumber">; // explicitly cast to the correct type
+                        ].filter(Boolean) as ("name" | "father_name" | "address" | "nrcNumber")[]; // explicitly cast to the correct type
 
                         const valid = await trigger(fields);
-
+                        console.log(fields)
                         if (valid) {
                             setCurrentInfo(3);
                         }
